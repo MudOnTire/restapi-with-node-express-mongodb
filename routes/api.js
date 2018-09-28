@@ -2,27 +2,42 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 
-router.get('/users', (req, res) => {
-  res.send({ type: 'GET' });
+router.get('/users', (req, res, next) => {
+  User.find(req.query)
+    .then((users) => {
+      res.send(users);
+    })
+    .catch(next);
 });
 
-router.post('/users', (req, res) => {
+router.post('/users', (req, res, next) => {
   User.create(req.body)
     .then((user) => {
       res.send(user);
     })
-    .catch((error) => {
-      res.status(400);
-      res.send(error);
-    });
+    .catch(next);
 });
 
-router.put('/users/:id', (req, res) => {
-  res.send({ type: 'PUT' });
+router.put('/users/:id', (req, res, next) => {
+  const id = req.params.id;
+  User.findByIdAndUpdate(id, req.body)
+    .then(() => {
+      User.findById(id)
+        .then((user) => {
+          res.send(user);
+        })
+        .catch(next);
+    })
+    .catch(next);
 });
 
-router.delete('/users/:id', (req, res) => {
-  res.send({ type: 'DELETE' });
+router.delete('/users/:id', (req, res, next) => {
+  const id = req.params.id;
+  User.findByIdAndRemove(id)
+    .then(() => {
+      res.sendStatus(200);
+    })
+    .catch(next);
 });
 
 module.exports = router;
